@@ -36,7 +36,7 @@ public class ProductServicesImpl implements IProductService {
 
 
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional
 	public ResponseEntity<ProductResponseRest> save(Product product, Long categoryId) {
 		
 		ProductResponseRest response = new ProductResponseRest();
@@ -82,6 +82,7 @@ public class ProductServicesImpl implements IProductService {
 
 
 	@Override
+	@Transactional(readOnly = true)
 	public ResponseEntity<ProductResponseRest> searchById(Long id) {
 		ProductResponseRest response = new ProductResponseRest();
 		List<Product> list = new ArrayList<>();
@@ -108,6 +109,50 @@ public class ProductServicesImpl implements IProductService {
 		} catch (Exception e) {
 			e.getStackTrace();
 			response.setMetadata("respuesta nok", "-1", "Error al guardar producto");
+			return new ResponseEntity<ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
+	}
+
+
+
+
+
+	@Override
+	@Transactional(readOnly = true)
+	public ResponseEntity<ProductResponseRest> searchByName(String name) {
+		ProductResponseRest response = new ProductResponseRest();
+		List<Product> list = new ArrayList<>();
+		List<Product> listAux = new ArrayList<>();
+		
+		try {
+			
+			//search product by name
+			listAux = productDao.findByNameContainingIgnoreCase(name);
+			
+			
+			if(listAux.size() > 0) {
+				
+				listAux.stream().forEach((p) ->{
+					byte [] imageDescompressed = Util.decompressZLib(p.getPicture());
+					p.setPicture(imageDescompressed);
+					list.add(p);
+					
+				});
+				
+				
+				response.getProduct().setProducts(list);
+				response.setMetadata("respuesta ok", "00", "Producto encontrado");
+				
+			}else {
+				response.setMetadata("respuesta nok", "-1", "Producto no encontrada");
+				return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+			}
+			
+		} catch (Exception e) {
+			e.getStackTrace();
+			response.setMetadata("respuesta nok", "-1", "Error al buscar producto por nombre");
 			return new ResponseEntity<ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
