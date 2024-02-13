@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.company.inventory.model.Product;
+import com.company.inventory.response.CategoryResponseRest;
 import com.company.inventory.response.ProductResponseRest;
 import com.company.inventory.services.IProductService;
 import com.company.inventory.util.Util;
@@ -96,6 +97,14 @@ public class ProductRestController {
 	@DeleteMapping("/products/{id}")
 	public ResponseEntity<ProductResponseRest> deleteById(@PathVariable Long id){
 		ResponseEntity<ProductResponseRest> response = productService.deleteById(id);
+		return response;
+		
+	}
+	
+	@GetMapping("/products")
+	public ResponseEntity<ProductResponseRest> search(){
+		
+		ResponseEntity<ProductResponseRest> response = productService.search();
 		return response;
 		
 	}
